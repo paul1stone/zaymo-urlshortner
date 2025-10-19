@@ -110,7 +110,6 @@ export default function EmailShortener() {
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: '#f5f5f5', py: 4 }}>
       <Container maxWidth="sm">
-        {/* Header */}
         <Box
           sx={{
             textAlign: 'center',
@@ -169,11 +168,10 @@ export default function EmailShortener() {
               fontWeight: 500,
             }}
           >
-            Optimize your emails by shortening all URLs. Reduce file size for better deliverability.
+            Shorten your URLs here! (Saved in a DB so the link will always point to the same place)
           </Typography>
         </Box>
 
-        {/* Upload Card */}
         {!result && (
           <Paper sx={{ p: 4, mb: 2 }}>
             <Box
@@ -233,7 +231,6 @@ export default function EmailShortener() {
           </Paper>
         )}
 
-        {/* Results Card */}
         {result && (
           <Card>
             <CardContent sx={{ p: 4 }}>
@@ -244,7 +241,6 @@ export default function EmailShortener() {
                 </Typography>
               </Box>
 
-              {/* Links List */}
               <Box
                 sx={{
                   bgcolor: '#f5f5f5',
@@ -276,7 +272,6 @@ export default function EmailShortener() {
                 </Stack>
               </Box>
 
-              {/* Buttons */}
               <Stack spacing={2}>
                 <Button
                   fullWidth
