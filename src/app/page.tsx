@@ -3,9 +3,23 @@
 import { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertCircle, Download, Loader2, CheckCircle2, Mail } from 'lucide-react';
+
+interface Replacement {
+  originalUrl: string;
+  shortUrl: string;
+  code: string;
+}
+
+interface ShortenResult {
+  success: boolean;
+  modifiedHtml: string;
+  replacements: Replacement[];
+  stats: {
+    urlsShortened: number;
+  };
+}
 
 export default function EmailShortener() {
   const [file, setFile] = useState<File | null>(null);
