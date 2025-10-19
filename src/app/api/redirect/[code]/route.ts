@@ -2,7 +2,7 @@ import { prisma } from '@/lib/db';
 
 export async function GET(
   request: Request,
-  { params }: { params: { code: string } }
+  { params }: { params: Promise<{ code: string }> }
 ): Promise<Response> {
   try {
     const { code } = params;
