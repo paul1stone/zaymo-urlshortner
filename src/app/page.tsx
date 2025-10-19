@@ -10,7 +10,7 @@ import { AlertCircle, Download, Loader2, CheckCircle2, Mail } from 'lucide-react
 export default function EmailShortener() {
   const [file, setFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<any>(null);
+  const [result, setResult] = useState<ShortenResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -165,7 +165,7 @@ export default function EmailShortener() {
             <CardContent className="space-y-4">
               {/* Scrollable Links List */}
               <div className="bg-slate-700 rounded-lg p-4 max-h-80 overflow-y-auto space-y-3">
-                {result.replacements.map((replacement: any, idx: number) => (
+                {result.replacements.map((replacement: Replacement, idx: number) => (
                   <div key={idx} className="text-sm">
                     <p className="text-slate-300 break-all truncate">{replacement.originalUrl}</p>
                     <div className="flex items-center gap-2 mt-1">
