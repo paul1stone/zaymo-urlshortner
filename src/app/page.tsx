@@ -1,10 +1,19 @@
 'use client';
 
 import { useState, useRef } from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { AlertCircle, Download, Loader2, CheckCircle2, Mail } from 'lucide-react';
+import {
+  Container,
+  Paper,
+  Button,
+  Box,
+  Typography,
+  Alert,
+  Card,
+  CardContent,
+  CircularProgress,
+  Stack,
+} from '@mui/material';
+import { CloudUpload, Download, CheckCircle, Mail } from '@mui/icons-material';
 
 interface Replacement {
   originalUrl: string;
@@ -99,123 +108,201 @@ export default function EmailShortener() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-4">
-      <div className="max-w-2xl mx-auto">
+    <Box sx={{ minHeight: '100vh', bgcolor: '#f5f5f5', py: 4 }}>
+      <Container maxWidth="sm">
         {/* Header */}
-        <div className="text-center mb-8">
-          <div className="flex items-center justify-center gap-2 mb-4">
-            <Mail className="w-8 h-8 text-blue-400" />
-            <h1 className="text-4xl font-bold text-white">Email URL Shortener</h1>
-          </div>
-          <p className="text-slate-300">Optimize your emails by shortening all URLs. Reduce file size for better deliverability.</p>
-        </div>
+        <Box
+          sx={{
+            textAlign: 'center',
+            mb: 5,
+            animation: 'fadeIn 0.6s ease-in',
+            '@keyframes fadeIn': {
+              from: { opacity: 0, transform: 'translateY(-20px)' },
+              to: { opacity: 1, transform: 'translateY(0)' },
+            },
+          }}
+        >
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 2, mb: 2 }}>
+            <Mail
+              sx={{
+                fontSize: 48,
+                background: 'linear-gradient(135deg, #1976d2 0%, #0288d1 100%)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text',
+              }}
+            />
+            <Typography
+              variant="h3"
+              component="h1"
+              sx={{
+                fontWeight: 900,
+                background: 'linear-gradient(135deg, #1976d2 0%, #0288d1 100%)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text',
+                letterSpacing: '-0.5px',
+              }}
+            >
+              Email URL Shortener
+            </Typography>
+          </Box>
 
-        {/* Upload Card - Only show if no results */}
+          <Box
+            sx={{
+              height: 4,
+              width: 60,
+              background: 'linear-gradient(90deg, #1976d2 0%, #0288d1 100%)',
+              mx: 'auto',
+              borderRadius: 2,
+              mb: 2,
+            }}
+          />
+
+          <Typography
+            variant="body1"
+            color="textSecondary"
+            sx={{
+              fontSize: '1.05rem',
+              maxWidth: 500,
+              mx: 'auto',
+              fontWeight: 500,
+            }}
+          >
+            Optimize your emails by shortening all URLs. Reduce file size for better deliverability.
+          </Typography>
+        </Box>
+
+        {/* Upload Card */}
         {!result && (
-          <Card className="bg-slate-800 border-slate-700 mb-6">
-            <CardHeader>
-              <CardTitle className="text-white">Upload Email Template</CardTitle>
-              <CardDescription>Select an HTML email file to shorten all URLs</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div
-                onDragOver={handleDragOver}
-                onDrop={handleDrop}
-                className="border-2 border-dashed border-slate-600 rounded-lg p-8 text-center cursor-pointer hover:border-blue-400 transition-colors"
-                onClick={() => fileInputRef.current?.click()}
-              >
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept=".html"
-                  onChange={handleFileChange}
-                  className="hidden"
-                />
-                <div className="mb-3">
-                  <Mail className="w-10 h-10 text-slate-400 mx-auto mb-2" />
-                  <p className="text-white font-medium">Drag and drop your HTML file here</p>
-                  <p className="text-slate-400 text-sm">or click to browse</p>
-                </div>
-                {file && (
-                  <p className="text-blue-400 text-sm font-medium">{file.name}</p>
-                )}
-              </div>
-
-              {error && (
-                <Alert className="mt-4 bg-red-900 border-red-700">
-                  <AlertCircle className="h-4 w-4 text-red-400" />
-                  <AlertDescription className="text-red-200">{error}</AlertDescription>
-                </Alert>
+          <Paper sx={{ p: 4, mb: 2 }}>
+            <Box
+              onDragOver={handleDragOver}
+              onDrop={handleDrop}
+              onClick={() => fileInputRef.current?.click()}
+              sx={{
+                border: '2px dashed #ccc',
+                borderRadius: 2,
+                p: 4,
+                textAlign: 'center',
+                cursor: 'pointer',
+                transition: 'all 0.3s',
+                '&:hover': {
+                  borderColor: '#1976d2',
+                  bgcolor: '#f0f7ff',
+                },
+              }}
+            >
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".html"
+                onChange={handleFileChange}
+                style={{ display: 'none' }}
+              />
+              <CloudUpload sx={{ fontSize: 48, color: '#1976d2', mb: 2 }} />
+              <Typography variant="h6" sx={{ mb: 1 }}>
+                Drag and drop your HTML file here
+              </Typography>
+              <Typography variant="body2" color="textSecondary">
+                or click to browse
+              </Typography>
+              {file && (
+                <Typography variant="body2" sx={{ mt: 2, color: '#1976d2', fontWeight: 'bold' }}>
+                  {file.name}
+                </Typography>
               )}
+            </Box>
 
-              <Button
-                onClick={handleShorten}
-                disabled={!file || loading}
-                className="w-full mt-6 bg-blue-600 hover:bg-blue-700 text-white"
-                size="lg"
-              >
-                {loading ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Processing...
-                  </>
-                ) : (
-                  'Shorten URLs'
-                )}
-              </Button>
-            </CardContent>
-          </Card>
+            {error && (
+              <Alert severity="error" sx={{ mt: 2 }}>
+                {error}
+              </Alert>
+            )}
+
+            <Button
+              fullWidth
+              variant="contained"
+              onClick={handleShorten}
+              disabled={!file || loading}
+              sx={{ mt: 3 }}
+              startIcon={loading ? <CircularProgress size={20} /> : undefined}
+            >
+              {loading ? 'Processing...' : 'Shorten URLs'}
+            </Button>
+          </Paper>
         )}
 
-        {/* Results Dashboard - Only show if results exist */}
+        {/* Results Card */}
         {result && (
-          <Card className="bg-slate-800 border-slate-700">
-            <CardHeader>
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="w-5 h-5 text-green-400" />
-                <CardTitle className="text-white">{result.stats.urlsShortened} Links Found</CardTitle>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {/* Scrollable Links List */}
-              <div className="bg-slate-700 rounded-lg p-4 max-h-80 overflow-y-auto space-y-3">
-                {result.replacements.map((replacement: Replacement, idx: number) => (
-                  <div key={idx} className="text-sm">
-                    <p className="text-slate-300 break-all truncate">{replacement.originalUrl}</p>
-                    <div className="flex items-center gap-2 mt-1">
-                      <span className="text-slate-400">→</span>
-                      <p className="text-blue-400 break-all truncate">{replacement.shortUrl}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
+          <Card>
+            <CardContent sx={{ p: 4 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 3 }}>
+                <CheckCircle sx={{ color: 'success.main' }} />
+                <Typography variant="h5">
+                  {result.stats.urlsShortened} Links Found
+                </Typography>
+              </Box>
 
-              {/* Download Button */}
-              <Button
-                onClick={handleDownload}
-                className="w-full bg-green-600 hover:bg-green-700 text-white"
-                size="lg"
-              >
-                <Download className="w-4 h-4 mr-2" />
-                Download Modified HTML
-              </Button>
-
-              {/* Reset Button */}
-              <Button
-                onClick={() => {
-                  setFile(null);
-                  setResult(null);
-                  setError(null);
+              {/* Links List */}
+              <Box
+                sx={{
+                  bgcolor: '#f5f5f5',
+                  borderRadius: 1,
+                  p: 2,
+                  maxHeight: 300,
+                  overflowY: 'auto',
+                  mb: 3,
                 }}
-                variant="outline"
-                className="w-full bg-slate-700 hover:bg-slate-600 text-white border-slate-600"
               >
-                Process Another File
-              </Button>
+                <Stack spacing={2}>
+                  {result.replacements.map((replacement: Replacement, idx: number) => (
+                    <Box key={idx}>
+                      <Typography variant="body2" sx={{ wordBreak: 'break-all' }} color="textSecondary">
+                        {replacement.originalUrl}
+                      </Typography>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.5 }}>
+                        <Typography sx={{ color: '#666' }}>→</Typography>
+                        <Typography
+                          variant="body2"
+                          sx={{ wordBreak: 'break-all', color: '#1976d2', fontWeight: 'bold' }}
+                        >
+                          {replacement.shortUrl}
+                        </Typography>
+                      </Box>
+                      {idx < result.replacements.length - 1 && <Box sx={{ borderTop: '1px solid #ddd', mt: 1 }} />}
+                    </Box>
+                  ))}
+                </Stack>
+              </Box>
+
+              {/* Buttons */}
+              <Stack spacing={2}>
+                <Button
+                  fullWidth
+                  variant="contained"
+                  color="success"
+                  onClick={handleDownload}
+                  startIcon={<Download />}
+                >
+                  Download Modified HTML
+                </Button>
+                <Button
+                  fullWidth
+                  variant="outlined"
+                  onClick={() => {
+                    setFile(null);
+                    setResult(null);
+                    setError(null);
+                  }}
+                >
+                  Process Another File
+                </Button>
+              </Stack>
             </CardContent>
           </Card>
         )}
-      </div>
-    </div>
+      </Container>
+    </Box>
   );
 }
