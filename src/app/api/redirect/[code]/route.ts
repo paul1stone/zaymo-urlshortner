@@ -5,7 +5,8 @@ export async function GET(
   { params }: { params: Promise<{ code: string }> }
 ): Promise<Response> {
   try {
-    const { code } = params;
+    const resolvedParams = await params;
+    const { code } = resolvedParams;
 
     const shortenedUrl = await prisma.shortenedUrl.findUnique({
       where: { code },
