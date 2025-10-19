@@ -1,103 +1,207 @@
-import Image from "next/image";
+'use client';
 
-export default function Home() {
+import { useState, useRef } from 'react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { AlertCircle, Download, Loader2, CheckCircle2, Mail } from 'lucide-react';
+
+export default function EmailShortener() {
+  const [file, setFile] = useState<File | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [result, setResult] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = e.target.files?.[0];
+    if (selectedFile) {
+      if (!selectedFile.name.endsWith('.html')) {
+        setError('Please select an HTML file');
+        return;
+      }
+      setFile(selectedFile);
+      setError(null);
+      setResult(null);
+    }
+  };
+
+  const handleShorten = async () => {
+    if (!file) return;
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const htmlContent = await file.text();
+
+      const response = await fetch('/api/shorten', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ htmlContent }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to shorten URLs');
+      }
+
+      setResult(data);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDownload = () => {
+    if (!result?.modifiedHtml) return;
+
+    const element = document.createElement('a');
+    const file = new Blob([result.modifiedHtml], { type: 'text/html' });
+    element.href = URL.createObjectURL(file);
+    element.download = 'shortened-email.html';
+    document.body.appendChild(element);
+    element.click();
+    document.body.removeChild(element);
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const droppedFile = e.dataTransfer.files?.[0];
+    if (droppedFile) {
+      setFile(droppedFile);
+      setError(null);
+      setResult(null);
+    }
+  };
+
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-4">
+      <div className="max-w-2xl mx-auto">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <div className="flex items-center justify-center gap-2 mb-4">
+            <Mail className="w-8 h-8 text-blue-400" />
+            <h1 className="text-4xl font-bold text-white">Email URL Shortener</h1>
+          </div>
+          <p className="text-slate-300">Optimize your emails by shortening all URLs. Reduce file size for better deliverability.</p>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+
+        {/* Upload Card - Only show if no results */}
+        {!result && (
+          <Card className="bg-slate-800 border-slate-700 mb-6">
+            <CardHeader>
+              <CardTitle className="text-white">Upload Email Template</CardTitle>
+              <CardDescription>Select an HTML email file to shorten all URLs</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div
+                onDragOver={handleDragOver}
+                onDrop={handleDrop}
+                className="border-2 border-dashed border-slate-600 rounded-lg p-8 text-center cursor-pointer hover:border-blue-400 transition-colors"
+                onClick={() => fileInputRef.current?.click()}
+              >
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept=".html"
+                  onChange={handleFileChange}
+                  className="hidden"
+                />
+                <div className="mb-3">
+                  <Mail className="w-10 h-10 text-slate-400 mx-auto mb-2" />
+                  <p className="text-white font-medium">Drag and drop your HTML file here</p>
+                  <p className="text-slate-400 text-sm">or click to browse</p>
+                </div>
+                {file && (
+                  <p className="text-blue-400 text-sm font-medium">{file.name}</p>
+                )}
+              </div>
+
+              {error && (
+                <Alert className="mt-4 bg-red-900 border-red-700">
+                  <AlertCircle className="h-4 w-4 text-red-400" />
+                  <AlertDescription className="text-red-200">{error}</AlertDescription>
+                </Alert>
+              )}
+
+              <Button
+                onClick={handleShorten}
+                disabled={!file || loading}
+                className="w-full mt-6 bg-blue-600 hover:bg-blue-700 text-white"
+                size="lg"
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Processing...
+                  </>
+                ) : (
+                  'Shorten URLs'
+                )}
+              </Button>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Results Dashboard - Only show if results exist */}
+        {result && (
+          <Card className="bg-slate-800 border-slate-700">
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="w-5 h-5 text-green-400" />
+                <CardTitle className="text-white">{result.stats.urlsShortened} Links Found</CardTitle>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {/* Scrollable Links List */}
+              <div className="bg-slate-700 rounded-lg p-4 max-h-80 overflow-y-auto space-y-3">
+                {result.replacements.map((replacement: any, idx: number) => (
+                  <div key={idx} className="text-sm">
+                    <p className="text-slate-300 break-all truncate">{replacement.originalUrl}</p>
+                    <div className="flex items-center gap-2 mt-1">
+                      <span className="text-slate-400">→</span>
+                      <p className="text-blue-400 break-all truncate">{replacement.shortUrl}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Download Button */}
+              <Button
+                onClick={handleDownload}
+                className="w-full bg-green-600 hover:bg-green-700 text-white"
+                size="lg"
+              >
+                <Download className="w-4 h-4 mr-2" />
+                Download Modified HTML
+              </Button>
+
+              {/* Reset Button */}
+              <Button
+                onClick={() => {
+                  setFile(null);
+                  setResult(null);
+                  setError(null);
+                }}
+                variant="outline"
+                className="w-full bg-slate-700 hover:bg-slate-600 text-white border-slate-600"
+              >
+                Process Another File
+              </Button>
+            </CardContent>
+          </Card>
+        )}
+      </div>
     </div>
   );
 }
